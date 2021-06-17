@@ -28,8 +28,8 @@ function findName(route) {
             }
         },
         error: function (exception) {
-            console.log(exception.responseJSON);
-            $("#compare-result").parent().show();
+            $("#notificaciones").html(`<p> Error: ${exception.responseJSON.message} </p>`);
+            $("#compare-result").parent().hide();
         }
     });
 }
