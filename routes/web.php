@@ -21,4 +21,6 @@ Auth::routes(['register' => false]);
 
 Route::get('/home', 'HomeController@index')->name('home');
 Route::post('/find', 'Search\SearchController@find')->name('find');
+Route::get('/palin', 'Search\SearchController@is_palindrome')->name('palin');
+Route::post('/exportReport', 'Search\SearchController@exportReport')->name('exportReport');
 

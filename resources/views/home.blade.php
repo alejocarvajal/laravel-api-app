@@ -1,7 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-
+<style>
+    .tableFixHead thead th { position: sticky; top: 0; z-index: 1; }
+</style>
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-md-11">
@@ -46,25 +48,31 @@
                             </div>
                             <div class="form-group row">
                                 <div class="offset-4 col-8">
-                                    <a id="submit" class="btn btn-primary" onclick="findName('{{ route("find") }}')"><i
+                                    <a id="findName" class="btn btn-info" onclick="findName('{{ route("find") }}')"><i
                                             class="fa fa-search"></i> Buscar</a>
+                                    <a id="exportExcel" class="btn btn-success" data-export="Excel"
+                                       onclick="exportReport('{{ route("exportReport") }}', 'xlsx', this)"><i
+                                            class="fa fa-download"></i> Exportar Excel</a>
+                                    <a id="exportPDF" class="btn btn-danger" data-export="PDF"
+                                       onclick="exportReport('{{ route("exportReport") }}', 'pdf', this)"><i
+                                            class="fa fa-download"></i> Exportar PDF</a>
                                 </div>
                             </div>
                         </form>
                         <div id="notificaciones">
                         </div>
-                        <div class="table-result">
-                            <table class="table" style="display: none;">
+                        <div class="table-result col-md-12" style="overflow: scroll; max-height: 500px;">
+                            <table class="table tableFixHead" style="display: none;">
                                 <thead>
                                 <tr>
                                     <th scope="col">Nombre</th>
+                                    <th scope="col">Porcentaje</th>
                                     <th scope="col">Departamento</th>
                                     <th scope="col">Localidad</th>
                                     <th scope="col">Municipio</th>
                                     <th scope="col">Años activo</th>
                                     <th scope="col">Tipo persona</th>
                                     <th scope="col">Tipo cargo</th>
-                                    <th scope="col">Porcentaje</th>
                                 </tr>
                                 </thead>
                                 <tbody id="compare-result">

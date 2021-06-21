@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Search;
 
+use App\Exports\SearchExport;
 use App\Http\Controllers\Controller;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
@@ -39,7 +40,8 @@ class SearchController extends Controller
         ];
 
         $token = $this->getToken();
-        if($token['error'] == true){
+
+        if ($token['error'] == true) {
             return response()
                 ->json([
                     'type' => 'error',
@@ -47,7 +49,7 @@ class SearchController extends Controller
                 ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
         $headers = [
-            'Authorization' => 'Bears '. $token['token']
+            'Authorization' => 'Bears ' . $token['token']
         ];
 
         $comparacion = $this->callStradataAPI($api, $params, $headers);
@@ -119,7 +121,74 @@ class SearchController extends Controller
                 'code' => 500
             ];
         }
-        return (object) $this->response;
+        return (object)$this->response;
+    }
+
+    public function is_palindrome()
+    {
+        $cadena = 'Allí por la tropa portado, traído a ese paraje de maniobras, una tipa como capitán usar boina me dejara, pese a odiar toda tropa por tal ropilla';
+        $retorno = false;
+        //convierte toda la frase a minuscula incluyendo caraceteres especiales
+        $cadena = mb_strtolower($cadena, 'UTF-8');
+
+        //reemplaza los acentos por caracteres normales
+        $cadena = $this->removeAccents($cadena);
+
+        //reemplaza caracteres de puntuación
+        $patron = '/[¿!¡;,:\.\?#@()"]/';
+        $reemplazo = '';
+        $cadena = preg_replace($patron, $reemplazo, trim($cadena));
+
+        //reemplaza los espacios
+        $cadena = str_replace(" ", "", $cadena);
+        $separar = explode(" ", $cadena);
+
+
+        if ($cadena == strrev($cadena)) {
+            $retorno = true;
+        }
+        return $retorno;
+    }
+
+    private function removeAccents($word)
+    {
+        $conv = [
+            'á' => 'a',
+            'é' => 'e',
+            'í' => 'i',
+            'ó' => 'o',
+            'ú' => 'u',
+        ];
+        return strtr($word, $conv);
+    }
+
+    public function exportReport(Request $request)
+    {
+        $writeType = \Maatwebsite\Excel\Excel::XLSX;
+        if($request->get('formato') == 'pdf'){
+            $writeType = \Maatwebsite\Excel\Excel::DOMPDF;
+        }
+        $data = $this->find($request);
+
+        if(!empty($data->errors) && isset($data->errors) ) {
+            return response()
+                ->json([
+                    'type' => 'error',
+                    'message' => $data->message
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        if(!is_array($data) && $data->getData()->type =='error') {
+            return response()
+                ->json([
+                    'type' => 'error',
+                    'message' => $data->getData()->message
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+
+        $data = $data['result']->resultados;
+        return Excel::download(new SearchExport($data), 'palibdromeReport.pdf',$writeType);
     }
 
 }
